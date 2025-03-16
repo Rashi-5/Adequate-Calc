@@ -7,34 +7,32 @@
 
 import Foundation
 
-// currency-exchange-service.js
-
-import Foundation
-
-// Model for exchange rate data
-struct ExchangeRateResponse: Codable {
-    let base: String
-    let date: String
-    let rates: [String: Double]
-}
 
 class CurrencyExchangeService {
     
-    private let apiKey = "fa79afdb00d268135968228652884c6c"
-    private let baseURL = "https://api.exchangerate-api.com/v4/latest/"
+    private let apiKey = APIConfig.apiKey
+    private let baseURL = APIConfig.baseURL
     
     func fetchExchangeRates(baseCurrency: String = "USD") async throws -> ExchangeRateResponse {
         guard let url = URL(string: "\(baseURL)\(baseCurrency)") else {
-            throw URLError(.badURL)
+            throw CurrencyExchangeError.invalidURL
         }
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw URLError(.badServerResponse)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw CurrencyExchangeError.requestFailed
+        }
+        
+        if httpResponse.statusCode != 200 {
+            throw CurrencyExchangeError.serverError(httpResponse.statusCode)
         }
         
         let decoder = JSONDecoder()
-        return try decoder.decode(ExchangeRateResponse.self, from: data)
+        do {
+            return try decoder.decode(ExchangeRateResponse.self, from: data)
+        } catch {
+            throw CurrencyExchangeError.decodingFailed
+        }
     }
 }
