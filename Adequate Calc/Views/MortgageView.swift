@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct MortgageView: View {
     @State private var loanAmount: String = ""
     @State private var rate: String = ""
@@ -22,6 +20,9 @@ struct MortgageView: View {
     @State private var showingAlert: Bool = false
     @State private var alertMessage: String = ""
     @State private var showResultSheet: Bool = false
+    
+    @State private var showToast: Bool = false
+    @State private var toastMessage: String = ""
     
     // enum for calculation types
     enum CalculationType: String, CaseIterable, Identifiable {
@@ -56,19 +57,19 @@ struct MortgageView: View {
                         }
                         
                         if calculationType != .loanAmount {
-                            CommonTextField(label: "Loan Amount ($)", text: $loanAmount)
+                            CommonTextField(label: "Loan Amount ($)", text: $loanAmount, snackDesc: .constant("Total loan amount initially borrowed"))
                         }
                         
                         if calculationType != .rate {
-                            CommonTextField(label: "Interest Rate (%)", text: $rate)
+                            CommonTextField(label: "Interest Rate (%)", text: $rate, snackDesc: .constant(""))
                         }
                         
                         if calculationType != .years {
-                            CommonTextField(label: "Time Period (Years)", text: $years)
+                            CommonTextField(label: "Time Period (Years)", text: $years, snackDesc: .constant(""))
                         }
                         
                         if calculationType != .payment {
-                            CommonTextField(label: "Monthly Payment ($)", text: $payment)
+                            CommonTextField(label: "Monthly Payment ($)", text: $payment, snackDesc: .constant(""))
                         }
                         
                     }
@@ -157,7 +158,7 @@ struct MortgageView: View {
                 loanAmount: loanAmountValue,
                 payment: paymentValue,
                 rate: rateValue,
-                showValidationError: { showError(.validationError) },
+                showValidationError: { _ in showError(.validationError) },
                 showPositiveValueError: { showError(.positiveValueError) }
             ) {
                 result = (calculatedYears, "Time Period (Years)")

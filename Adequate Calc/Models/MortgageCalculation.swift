@@ -44,24 +44,25 @@ struct MortgageCalculation{
             return nil
         }
         
-        // Check for positive values
-        if payment <= 0 || rate <= 0 || years <= 0 {
+        // Allow 0% interest, but prevent negative values
+        if payment <= 0 || rate < 0 || years <= 0 { 
             showPositiveValueError()
             return nil
         }
-        
+
         let monthlyRate = rate / 100 / 12
         let totalPayments = years * 12
         
-        // Avoid division by zero
+        // If interest rate is 0
         if monthlyRate == 0 {
             return payment * totalPayments
         }
-        
+
         let numerator = payment * (1 - pow(1 + monthlyRate, -totalPayments))
         let denominator = monthlyRate
         return numerator / denominator
     }
+
     
     static func calculateInterestRate(
         loanAmount: Double?,
@@ -115,35 +116,35 @@ struct MortgageCalculation{
         loanAmount: Double?,
         payment: Double?,
         rate: Double?,
-        showValidationError: () -> Void,
+        showValidationError: (AppError) -> Void,
         showPositiveValueError: () -> Void
     ) -> Double? {
-        
+
         // Validate inputs
         guard let loanAmount = loanAmount, let payment = payment, let rate = rate else {
-            showValidationError()
+            showValidationError(.validationError)
             return nil
         }
-        
+
         // Check for positive values
         if loanAmount <= 0 || payment <= 0 || rate <= 0 {
             showPositiveValueError()
             return nil
         }
-        
+
         let monthlyRate = rate / 100 / 12
-        
+
         // Ensure payment covers at least the interest
         if payment <= loanAmount * monthlyRate {
-            showValidationError() 
+            showValidationError(.insufficientDataError) 
             return nil
         }
-        
+
         // Calculate loan term in months
         let numerator = log(payment / (payment - loanAmount * monthlyRate))
         let denominator = log(1 + monthlyRate)
         let totalPayments = numerator / denominator
-        
+
         // Convert to years
         return totalPayments / 12
     }

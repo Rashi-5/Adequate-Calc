@@ -20,7 +20,4 @@ struct CommonModels {
         }
     }
     
-   
-    
-    
 }

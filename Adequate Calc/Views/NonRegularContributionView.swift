@@ -54,23 +54,23 @@ struct NonRegularContributionView: View {
                         }
                         
                         if calculationType != .futureValue {
-                            CommonTextField(label: "Target Amount ($)", text: $futureValue)
+                            CommonTextField(label: "Target Amount ($)", text: $futureValue, snackDesc: .constant("The goal amount you want to reach"))
                         }
                         
                         if calculationType != .rate {
-                            CommonTextField(label: "Interest Rate (%)", text: $rate)
+                            CommonTextField(label: "Interest Rate (%)", text: $rate, snackDesc: .constant(""))
                         }
                         
                         if calculationType != .years {
-                            CommonTextField(label: "Time Period(Years)", text: $years)
+                            CommonTextField(label: "Time Period(Years)", text: $years, snackDesc: .constant(""))
                         }
                         
                         if calculationType != .initialInvestment {
-                            CommonTextField(label: "Initial Investment($)", text: $initialInvestment)
+                            CommonTextField(label: "Initial Investment($)", text: $initialInvestment, snackDesc: .constant(""))
                         }
                         
                         if calculationType != .compound {
-                            CommonTextField(label: "Compound Per Year", text: $compound)
+                            CommonTextField(label: "Compound Per Year", text: $compound, snackDesc: .constant("How many times the interest is added to your account in a year"))
                         }
                         
                     }
@@ -145,7 +145,7 @@ struct NonRegularContributionView: View {
             }
             
         case .rate:
-            if let calculatedR = InvestmentCalculation.calculateInterestRate(fv: fv, pv: pv, t: t, interestAdded: interestAdded, showValidationError: { showError(.validationError) }, showPositiveValueError: { showError(.positiveValueError) }) {
+            if let calculatedR = InvestmentCalculation.calculateInterestRate(fv: fv, pv: pv, t: t, interestAdded: interestAdded, showValidationError: { _ in showError(.validationError) }, showPositiveValueError: { showError(.positiveValueError) }) {
                 result = (calculatedR, "Interest Rate (%)")
                 rate = String(calculatedR)
             }

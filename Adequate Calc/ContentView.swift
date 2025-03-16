@@ -152,10 +152,7 @@ struct ContentView: View {
                             // Currency rates
                             HStack {
                                 
-                                Button(action: {
-                                    print("currency rates pressed")
-                                    // Add logout action here
-                                }) {
+                                Button(action: {}) {
                                     NavigationLink(destination: CurrencyExchangeView()) {
                                         HStack {
                                             Image(systemName: "coloncurrencysign.bank.building")

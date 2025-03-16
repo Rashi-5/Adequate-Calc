@@ -13,6 +13,7 @@ enum AppError: Error {
     case valueMismatch
     case invalidResponse
     case internalError
+    case insufficientDataError
     case unknown
 
     var localizedDescription: String {
@@ -27,6 +28,8 @@ enum AppError: Error {
             return "Invalid Response"
         case .internalError:
             return "Initial value cannot be less that the target"
+        case .insufficientDataError:
+            return "Payment is too low to cover the interest"
         case .unknown:
             return "Unknown Error"
         }

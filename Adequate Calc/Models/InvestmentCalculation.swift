@@ -21,13 +21,12 @@ struct InvestmentCalculation {
             return nil
         }
         
-        // FV = PV + (PV * r * t) + interestAdded
         return pv + (pv * (r / 100) * t) + interestAdded
     }
     
-    static func calculateInterestRate(fv: Double?, pv: Double?, t: Double?, interestAdded: Double, showValidationError: () -> Void, showPositiveValueError: () -> Void) -> Double? {
+    static func calculateInterestRate(fv: Double?, pv: Double?, t: Double?, interestAdded: Double, showValidationError: (AppError) -> Void, showPositiveValueError: () -> Void) -> Double? {
         guard let fv = fv, let pv = pv, let t = t else {
-            showValidationError()
+            showValidationError(.validationError)
             return nil
         }
         
@@ -37,7 +36,12 @@ struct InvestmentCalculation {
             return nil
         }
         
-        // r = ((FV - PV - interestAdded) / (PV * t)) * 100
+        // Check if the payment is enough to cover principal and added interest
+        if fv < pv + interestAdded {
+            showValidationError(.insufficientDataError)
+            return nil
+        }
+        
         return ((fv - pv - interestAdded) / (pv * t)) * 100
     }
     
@@ -53,7 +57,6 @@ struct InvestmentCalculation {
             return nil
         }
         
-        // t = (FV - PV - interestAdded) / (PV * (r / 100))
         return (fv - pv - interestAdded) / (pv * (r / 100))
     }
     
@@ -64,12 +67,11 @@ struct InvestmentCalculation {
         }
         
         // Check for positive values
-        if fv <= 0 || r <= 0 || t <= 0 {
+        if fv <= 0 || r <= 0 || t <= 0 || interestAdded < 0 {
             showPositiveValueError()
             return nil
         }
         
-        // PV = (FV - interestAdded) / (1 + (r / 100) * t)
         return (fv - interestAdded) / (1 + (r / 100) * t)
     }
     

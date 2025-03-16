@@ -20,13 +20,15 @@ struct RegularContributionView: View {
     
     @State private var calculationType: CalculationType = .futureValue
     @State private var showResultSheet: Bool = false
-
+    
     @State private var result: (value: Double, type: String)?
     @EnvironmentObject var darkModeManager: DarkModeManager
     
     @State private var showingAlert: Bool = false
     @State private var alertMessage: String = ""
-    
+    @State private var targetDesc: String = ""
+    @State private var initialDesc: String = ""
+
     enum CalculationType: String, CaseIterable, Identifiable {
         case futureValue = "Target Amount"
         case presentValue = "Initial Investment"
@@ -41,6 +43,7 @@ struct RegularContributionView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading) {
+                    
                     Section {
                         HStack{
                             
@@ -60,29 +63,29 @@ struct RegularContributionView: View {
                         }
                         
                         if calculationType != .futureValue {
-                            CommonTextField(label: "Target Amount ($)", text: $futureValue)
+                            CommonTextField(label: "Target Amount ($)", text: $futureValue, snackDesc: $targetDesc)
                         }
                         
                         if calculationType != .presentValue {
-                            CommonTextField(label: "Initial Investment($)", text: $presentValue)
+                            CommonTextField(label: "Initial Amount($)", text: $presentValue, snackDesc: $initialDesc)
                         }
                         
                         if calculationType != .rate {
-                            CommonTextField(label: "Interest Rate (%)", text: $rate)
+                            CommonTextField(label: "Interest Rate (%)", text: $rate, snackDesc: .constant(""))
                         }
                         
                         if calculationType != .numOfPay {
-                            CommonTextField(label: "Number of Payments", text: $numOfPay)
+                            CommonTextField(label: "Number of Payments", text: $numOfPay, snackDesc: .constant(""))
                         }
                         
                         if calculationType != .payment {
-                            CommonTextField(label: "Monthly Payment($)", text: $payment)
+                            CommonTextField(label: "Monthly Payment($)", text: $payment, snackDesc: .constant(""))
                         }
                         
                         HStack{
                             Text("Compounding Per Year")
                                 .foregroundColor(darkModeManager.isDarkMode ? Color.white : Color.black)
-
+                            
                             Spacer()
                             
                             Picker("", selection: $compoundFrequency) {
@@ -100,7 +103,7 @@ struct RegularContributionView: View {
                             .padding(.top, 10)
                         
                     }
-        
+                    
                     Spacer()
                     
                     CommonButton(label: "Calculate") {
@@ -108,19 +111,19 @@ struct RegularContributionView: View {
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                             
-//                            if futureValue < presentValue {
-//                                showError(.internalError)
-//                                return
-//                            } else {
+                            if futureValue < presentValue {
+                                showError(.internalError)
+                                return
+                            } else {
                                 
                                 if let calculatedResult = result, calculatedResult.value >= 0 {
                                     showResultSheet = true
                                 } else {
                                     showError(.valueMismatch)
                                 }
-//                            }
+                            }
                         }
-                                            
+                        
                     }
                 }
                 .padding()
@@ -151,16 +154,22 @@ struct RegularContributionView: View {
                         (type: "Interest", value: (Double(futureValue) ?? 0) * (Double(rate) ?? 0) / 100)
                     ],
                     sumData: [
-                        (type: "Initial Investment (LKR)", value: Double(presentValue) ?? 0),
+                        (type: "Initial Amount (LKR)", value: Double(presentValue) ?? 0),
                         (type: "Interest (%)", value: Double(rate) ?? 0),
                         (type: "Number of Payments", value: Double(numOfPay) ?? 0),
                         (type: "Total Amount (LKR)", value: Double(futureValue) ?? 0),
                         (type: "Interest Added (LKR)", value: Double(payment) ?? 0),
-                        (type: "Compound Frequency", value: Double(compoundFrequency))
+                        (type: "Compound Frequency", value: Double(compoundFrequency)),
+                        (type: "Payment Timing", value: paymentTiming ? 1.0 : 0.0)
+                        
                     ]
                 )
                 .presentationDetents([.fraction(0.9)])
                 .presentationDragIndicator(.visible)
+            }
+            .onAppear {
+                targetDesc = title == "Loan Calculation" ? "Total amount you should pay" : "The goal amount you want to reach"
+                initialDesc = title == "Loan Calculation" ? "Starting amount borrowed in a loan" : "Starting amount you deposit into your savings"
             }
         }
     }
@@ -232,7 +241,7 @@ struct RegularContributionView: View {
                 result = (calculatedNofPmt, "Number of Payments")
                 numOfPay = String(calculatedNofPmt)
             }
-        
+            
         case .payment:
             if let calculatedPayment = LoanCalculation.calculatePayment(
                 presentValue: pv,

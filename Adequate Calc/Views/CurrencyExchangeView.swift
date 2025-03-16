@@ -21,10 +21,19 @@ struct CurrencyExchangeView: View {
         NavigationView {
             VStack(alignment: .leading) {
                 
-                Text("Exchange Rates")
-                    .font(.title)
-                    .bold()
+                HStack{
+                    Text("Exchange Rates")
+                        .font(.title)
+                        .bold()
+                        .padding()
+                    
+                    Spacer()
+                    
+                    Button(action: fetchRates) {
+                        Image(systemName: "arrow.clockwise")
+                    }
                     .padding()
+                }
                 
                 // Search bar
                 TextField("Search Currency", text: $searchText)
@@ -86,11 +95,6 @@ struct CurrencyExchangeView: View {
                         .padding()
                     }
                     .foregroundColor(darkModeManager.isDarkMode ? .white : .black)
-                }
-            }
-            .toolbar {
-                Button(action: fetchRates) {
-                    Image(systemName: "arrow.clockwise")
                 }
             }
             .foregroundStyle(darkModeManager.isDarkMode ? Color.white : Color.black)
